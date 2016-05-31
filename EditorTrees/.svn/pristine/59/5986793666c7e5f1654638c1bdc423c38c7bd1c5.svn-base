@@ -1,0 +1,146 @@
+package editortrees;
+
+// A node in a height-balanced binary tree with rank.
+// Except for the NULL_NODE (if you choose to use one), one node cannot
+// belong to two different trees.
+
+public class Node {
+	
+	//Node NULL_NODE = new Node();
+	
+	enum Code {
+		SAME, LEFT, RIGHT;
+		// Used in the displayer and debug string
+		public String toString() {
+			switch (this) {
+				case LEFT:
+					return "/";
+				case SAME:
+					return "=";
+				case RIGHT:
+					return "\\";
+				default:
+					throw new IllegalStateException();
+			}
+		}
+	}
+	
+	// The fields would normally be private, but for the purposes of this class, 
+	// we want to be able to test the results of the algorithms in addition to the
+	// "publicly visible" effects
+	
+	char element;            
+	Node left, right; // subtrees
+	int rank = 0;         // inorder position of this node within its own subtree.
+	Code balance = Code.SAME;
+	int size = 0;
+	// Node parent;  // You may want this field.
+	// Feel free to add other fields that you find useful
+
+	// You will probably want to add several other methods
+	
+	//NULL_NODE constructur
+	public Node(){
+		this.left = null;
+		this.right = null;
+	}
+	
+	public Node(char element){
+		this.left = EditTree.NULL_NODE;
+		this.right = EditTree.NULL_NODE;
+		this.element = element;
+	}
+
+	// For the following methods, you should fill in the details so that they work correctly
+	
+	public int height() {
+		if(this.equals(EditTree.NULL_NODE)){
+			return -1;
+		}
+		return 0;
+	}
+
+	public int size() {
+		if(this==EditTree.NULL_NODE){
+			return 0;
+		}		
+		return 1+this.left.size()+this.right.size();
+	}
+	
+	public Node add(Node newNode) {
+		if(this.right.equals(EditTree.NULL_NODE)){
+			 this.right = newNode;
+			 this.checkBalance(true, this.right.balance);
+		}else{
+			this.right = this.right.add(newNode);
+		}
+		return this;
+	}
+
+	private void checkBalance(boolean addedRight, Code childBalance) {
+		if(addedRight){
+			switch(this.balance){
+			case RIGHT:
+				//need to rotate
+				rotate(this.balance,childBalance);
+			case LEFT:
+				this.balance = Code.SAME;
+			case SAME:
+				this.balance = Code.RIGHT;
+			}
+		}
+		else{
+			switch(this.balance){
+			case RIGHT:
+				this.balance = Code.SAME;
+			case LEFT:
+				//rotate
+			case SAME:
+				this.balance = Code.LEFT;
+			}
+		}
+		
+	}
+
+	private void rotate(Code balance2, Code childBalance) {
+		// TODO Auto-generated method stub.
+		if(balance2 == Code.RIGHT && childBalance == Code.RIGHT){
+			this.left = new Node(this.element);
+			this.element = this.right.element;
+			this.right = this.right.right;
+		}
+	}
+
+	public String toDebugString() {
+		if(this.equals(EditTree.NULL_NODE)){
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.element+""+this.rank+""+this.balance.toString()+", ");
+		sb.append(this.left.toDebugString());
+		sb.append(this.right.toDebugString());
+		return sb.toString();
+	}
+	
+	public String toString(){
+		if(this.equals(EditTree.NULL_NODE)){
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.left.toString());
+		sb.append(this.element+", ");
+		sb.append(this.right.toString());
+		return sb.toString();
+	}
+
+	public char get(int pos) {
+		if(this.rank==pos){
+			return this.element;
+		}
+		if(this.rank<pos){
+			return this.right.get(pos-(this.rank+1));
+		}
+		return this.left.get(pos);
+	}
+
+}

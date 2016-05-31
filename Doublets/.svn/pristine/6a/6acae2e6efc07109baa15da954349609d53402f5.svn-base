@@ -1,0 +1,41 @@
+/**
+ * Contains the general algorithm to search for doublets.
+ *
+ * @author <<YOUR NAME(S) HERE>>
+ *         Created Mar 18, 2011.
+ */
+public class Doublets {
+	private Links dictionary; 
+	
+	public Doublets(Links dictionary){
+		this.dictionary  = dictionary;
+	}
+	
+	public Chain getChain(String Start, String finish, ChainManager manager){
+		// load all the first possible chains to the word
+		// if null reutrn null
+		// if it is in the first chains then return that chain
+		
+		// while we havent found the chain
+		// load the next chain through the chain manager
+		// find all possible chains for that word
+		// add those chains to the currentChain, then to the chain manager
+		// if finsih == this word then return this chian
+		// else loop back throug with the next chain
+	}
+	
+	public static void main(String[] args) {
+		// set up a dictionary
+		
+		// print the apprpriate messages
+		
+		// scan in the first word
+		
+		// scan in the second word
+		
+		// scan in the apporpirate option chain structure
+		// based on this run getChain with correct structre
+		
+		// once chain found print the chain and the statistics 
+	}
+}

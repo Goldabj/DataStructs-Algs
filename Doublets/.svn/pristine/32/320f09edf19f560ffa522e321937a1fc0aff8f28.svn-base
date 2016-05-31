@@ -1,0 +1,148 @@
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Scanner;
+
+/**
+ * Contains the general algorithm to search for doublets.
+ *
+ * @author Brendan Goldacker, John Jagiella Created Mar 18, 2011.
+ */
+public class Doublets {
+	private Links dictionary;
+
+	public Doublets(Links dictionary) {
+		this.dictionary = dictionary;
+	}
+
+	public Chain getChain(String start, String finish, ChainManager manager) {
+		// load all the first possible chains to the word
+		HashSet<String> firstLinks = (HashSet<String>) this.dictionary.getCandidates(start);
+		HashSet<String> allLinks = new HashSet<String>(); // to keep track of
+															// already used
+															// paths
+		allLinks.addAll(firstLinks);
+		// if null return null
+		if (firstLinks == null) {
+			return null;
+		}
+		// add all the firstLinks to the chains and add chains to manager
+		Iterator<String> iter = firstLinks.iterator();
+		while (iter.hasNext()) {
+			Chain firstChain = new Chain();
+			String firstString = iter.next();
+			firstChain = firstChain.addLast(firstString);
+			manager.add(firstChain);
+			// if it is in the first chains then return that chain
+			if (firstString.equals(finish)) {
+				return firstChain;
+			}
+		}
+		firstLinks = null; // clean up some space
+		
+		if(manager.next() == null) { // if there are no Links for the start word
+			return null;
+		}
+
+		// while we haven't found the chain
+		while (true) {
+			Chain currentChain = manager.next();
+			String lastString = currentChain.getLast();
+			// find all links for the next string
+			HashSet<String> nextLinks = (HashSet<String>) this.dictionary.getCandidates(lastString);
+
+			Iterator<String> iter2 = nextLinks.iterator();
+			while (iter2.hasNext()) {
+				String nextString = iter2.next();
+				// make sure this string hasn't already been used
+				if (allLinks.contains(nextString)) {
+					continue;
+				} // else
+				currentChain = currentChain.addLast(nextString);
+				manager.add(currentChain);
+
+				// return if final word found
+				if (nextString.equals(finish)) {
+					return currentChain;
+				}
+			}
+			allLinks.addAll(nextLinks);
+		}
+	}
+
+	public static void main(String[] args) {
+		// set up a dictionary
+		Links dictionary = new Links("english.cleaned.all.35.txt");
+		Doublets doublet = new Doublets(dictionary);
+
+		// print the appropriate messages
+		System.out.println("Welcome to Doublets, a game of \"verbal torture.\"");
+		Scanner in = new Scanner(System.in);
+
+		// scan in the first word
+		String startWord = "";
+		while (true) {
+			System.out.println("Enter Starting Word: ");
+			startWord = in.next();
+			if (dictionary.contains(startWord)) {
+				break;
+			} // else
+			System.out.println("Error: word is not found in dictionary");
+		}
+
+		// scan in the second word
+		String endWord = "";
+		while (true) {
+			System.out.println("Ender ending word: ");
+			endWord = in.next();
+			if (dictionary.contains(endWord) && endWord.length() == startWord.length()) {
+				break;
+			}
+			if (endWord.length() != startWord.length()) {
+				System.out.println("Error: word lengths do not match");
+				continue;
+			}
+			System.out.println("Error: word is not found in dictionary");
+		}
+
+		// scan in the appropriate option chain structure
+		// based on this run getChain with correct structure
+		ChainManager manager = null;
+		while (true) {
+			System.out.println("Enter chain manager (s: stack, q: queue, p: priorityQueue, x: exit): ");
+			String option = in.next();
+			option = option.trim();
+			if (option.equals("s")) {
+				manager = new StackManager();
+				break;
+			} else if (option.equals("q")) {
+				manager = new QueueManager();
+				break;
+			} else if (option.equals("p")) {
+				manager = new PriorityQueueManager();
+				break;
+			} // else
+			System.out.println("Error: invalid option!!");
+		}
+		in.close();
+		// find the chain
+		Chain chain = doublet.getChain(startWord, endWord, manager);
+
+		// once chain found print the chain and the statistics
+		if (chain == null) {
+			System.out.println("There are no chains between \"" + startWord + "\" and \"" + endWord + "\"");
+		} else {
+			Iterator<String> iter = chain.iterator();
+			StringBuilder string = new StringBuilder();
+			string.append('[');
+			while (iter.hasNext()) {
+				string.append(iter.next());
+			}
+			string.append(']');
+			System.out.println("Chain: " + string.toString());
+			System.out.println("Length" + chain.length() + 1);
+			System.out.println("MaxSize: " + manager.maxSize());
+			System.out.println("Candidates: " + manager.getNumberOfNexts());
+		}
+
+	}
+}

@@ -1,0 +1,263 @@
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Random;
+import java.util.TreeSet;
+
+
+/**
+ * This program runs various sorts and gathers timing information on them.
+ *
+ * @author Alan Yates and Brendan Goldacker
+ *         Created May 7, 2013.
+ */
+public class SortRunner {
+	private static Random rand = new Random(17); // uses a fixed seed for debugging. Can remove later.
+	
+	/**
+	 * Starts here.
+	 *
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// array size must be an int. You will need to use something much larger
+		int size = 50000; 
+		
+		// Each integer will have the range from [0, maxValue). If this is significantly higher than size, you
+		// will have small likelihood of getting duplicates.
+		int maxValue = Integer.MAX_VALUE; 
+		
+		// Test 1: Array of random values.
+		int[] randomIntArray = getRandomIntArray(size, maxValue);
+		runAllSortsForOneArray(randomIntArray);
+
+		// DONE: Tests 2-4
+		// Generate the three other types of arrays (shuffled, almost sorted, almost reverse sorted)
+		// and run the sorts on those as well.
+			
+		// Test 2: Array of shuffled values.
+		int[] shuffledIntArray = getUniqueElementArray(size);
+		runAllSortsForOneArray(shuffledIntArray);
+		
+		// Test 3: Array of almost sorted values.
+		int[] almostSorted = new int[size];
+		
+		for(int i=0; i < size; i++){
+			almostSorted[i] = i;
+		}
+		int swaps = (int) (size*0.1);
+		for(int j=1; j <= swaps; j++){
+			int spot1 = rand.nextInt(size);
+			int spot2 = rand.nextInt(size);
+			switchSpots(almostSorted, spot1, spot2);
+		}
+		
+		// Test 4: Array of almost sorted values (backwards of Test 3).
+		int[] almostSortBackwards = new int[size];
+		for(int i=size -1; i > 0; i--){
+		almostSortBackwards[size-i] = almostSorted[i];
+		}
+		runAllSortsForOneArray(almostSortBackwards);
+	}
+
+	/**
+	 * 
+	 * Runs all the specified sorts on the given array and outputs timing results on each.
+	 *
+	 * @param array
+	 */
+	private static void runAllSortsForOneArray(int[] array) {
+		long startTime, elapsedTime; 
+		boolean isSorted = false;
+		
+		int[] sortedIntsUsingDefaultSort = array.clone();
+		Integer[] sortedIntegersUsingDefaultSort = copyToIntegerArray(array);
+		Integer[] sortedIntegersUsingHeapSort = sortedIntegersUsingDefaultSort.clone();
+		Integer[] sortedIntegersUsingTreeSort = sortedIntegersUsingDefaultSort.clone();
+		Integer[] sortedIntegersUsingSkipListSort = sortedIntegersUsingDefaultSort.clone();
+		int[] sortedIntsUsingQuickSort = array.clone();
+
+		int size = array.length;
+		
+		// What is the default sort for ints? Read the javadoc.
+		startTime = System.currentTimeMillis();  
+		Arrays.sort(sortedIntsUsingDefaultSort); 
+		elapsedTime = (System.currentTimeMillis() - startTime);
+		isSorted = verifySort(sortedIntsUsingDefaultSort);
+		displayResults("int", "the default sort", elapsedTime, size, isSorted);
+		
+		// What is the default sort for Integers (which are objects that wrap ints)?
+		startTime = System.currentTimeMillis();  
+		Arrays.sort(sortedIntegersUsingDefaultSort); 
+		elapsedTime = (System.currentTimeMillis() - startTime);
+		isSorted = verifySort(sortedIntegersUsingDefaultSort);
+		displayResults("Integer", "the default sort", elapsedTime, size, isSorted);
+
+		// Sort using the following methods, and time and verify each like done above. 
+		
+		// DONE: a simple sort that uses a TreeSet
+		
+		startTime = System.currentTimeMillis();  
+		sortedIntegersUsingTreeSort = treeSort(sortedIntegersUsingTreeSort); 
+		elapsedTime = (System.currentTimeMillis() - startTime);
+		isSorted = verifySort(sortedIntegersUsingTreeSort);
+		displayResults("Integer", "the Tree sort", elapsedTime, size, isSorted);
+		
+		// DONE: your BinaryHeap sort 
+		
+		startTime = System.currentTimeMillis();  
+		sortedIntegersUsingHeapSort = heapSort(sortedIntegersUsingHeapSort); 
+		elapsedTime = (System.currentTimeMillis() - startTime);
+		isSorted = verifySort(sortedIntegersUsingHeapSort);
+		displayResults("Integer", "the Heap sort", elapsedTime, size, isSorted);
+		
+		
+		// DONE: your implementation of quick sort 
+		
+
+		startTime = System.currentTimeMillis();  
+		sortedIntsUsingQuickSort = quickSort(sortedIntsUsingQuickSort); 
+		elapsedTime = (System.currentTimeMillis() - startTime);
+		isSorted = verifySort(sortedIntsUsingQuickSort);
+		displayResults("int", "the Quick sort", elapsedTime, size, isSorted);
+		
+		
+	}
+	
+	public static final void switchSpots(int[] arr, int spot1, int spot2){
+		int temp = arr[spot1];
+		arr[spot1] = arr[spot2];
+		arr[spot2] = temp;
+	}
+	
+	private static Integer[] treeSort(Integer[] ints){
+		TreeSet<Integer> tree = new TreeSet<>();
+		for(int i=0; i < ints.length; i++){
+		tree.add(ints[i]);
+		}
+		Integer[] new_ints = new Integer[tree.size()];
+		int j = 0;
+		while(!tree.isEmpty()){
+			new_ints[j] = tree.first();
+			tree.remove(tree.first());
+			j++;
+		}
+		return new_ints;
+	}
+	
+	private static Integer[] heapSort(Integer[] ints){
+		BinaryHeap<Integer> sortHeap = new BinaryHeap<>();
+		sortHeap.sort(ints);
+		return ints;
+	}
+	
+	private static int[] quickSort(int[] ints){
+		//return quickSortHelper(ints, 0, ints.length - 1, 10);
+		return quickHelp(ints, 0, ints.length - 1);
+	}
+	
+	private static int[] quickHelp(int[] arr, int low, int high){
+		int pivot = arr[low];
+		int i = low +1;
+		int j = high;
+		while(true){
+			while (arr[i] < pivot) i++;
+			while (arr[j] > pivot) j--;
+			if (i >= j) break;
+			switchSpots(arr, i, j);
+		}
+		switchSpots(arr, low, j);
+		return arr;
+	}
+	
+//	private static int[] quickSortHelper(int[] arr, int low, int high, int cutoff){
+//		if(high - low > cutoff){
+//			//insertion sort
+//		}
+//		int mid = (low+high)/2;
+//		if(arr[mid] < arr[low]){
+//			
+//		}
+//	}
+
+	private static void displayResults(String typeName, String sortName, long elapsedTime, int size,  boolean isSorted) {
+		if (isSorted) {
+			System.out.printf("Sorted %.1e %ss using %s in %d milliseconds\n", (double)size, typeName, sortName, elapsedTime);
+		} else {
+			System.out.println("ARRAY NOT SORTED");
+		}
+	}
+	
+	/**
+	 * Checks in O(n) time if this array is sorted.
+	 *
+	 * @param a An array to check to see if it is sorted.
+	 */
+	private static boolean verifySort(int[] a) {
+		// DONE: implement this.
+		for(int i=0; i<a.length -1; i++){
+			if(a[i] > a[i+1]){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Checks in O(n) time if this array is sorted.
+	 *
+	 * @param a An array to check to see if it is sorted.
+	 */
+	private static boolean verifySort(Integer[] a) {
+		// DONE: implement this.
+		for(int i=0; i<a.length -1; i++){
+			if(a[i].compareTo(a[i+1]) > 0){
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Copies from an int array to an Integer array.
+	 *
+	 * @param randomIntArray
+	 * @return A clone of the primitive int array, but with Integer objects.
+	 */
+	private static Integer[] copyToIntegerArray(int[] ints) {
+		Integer[] integers = new Integer[ints.length];
+		for (int i = 0; i < ints.length; i++) {
+			integers[i] = ints[i];
+		}
+		return integers;
+	}
+
+	/**
+	 * Creates and returns an array of random ints of the given size.
+	 *
+	 * @return An array of random ints.
+	 */
+	private static int[] getRandomIntArray(int size, int maxValue) {
+		int[] a = new int[size];
+		for (int i = 0; i < size; i++) {
+			a[i] = rand.nextInt(maxValue);
+		}
+		return a;
+	}
+
+	/**
+	 * Creates a shuffled random array.
+	 *
+	 * @param size
+	 * @return An array of the ints from 0 to size-1, all shuffled
+	 */
+	private static int[] getUniqueElementArray(int size) {
+		// DONE: implement and call this method.
+		int[] shuffledIntArray = new int[size];
+		for(int i=0; i < size; i++){
+			shuffledIntArray[i] = i;
+		}
+		Collections.shuffle(Arrays.asList(shuffledIntArray));
+		return shuffledIntArray;
+	}
+	
+}

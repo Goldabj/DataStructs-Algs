@@ -1,0 +1,21 @@
+/**
+ * Priority Queue Manager
+ *
+ * @author goldacbj.
+ *         Created Nov 1, 2015.
+ */
+public class PriorityQueueManager extends ChainManager {
+
+	@Override
+	public void add(Chain chain) {
+		// TODO Auto-generated method stub.
+		
+	}
+
+	@Override
+	public Chain next() {
+		// TODO Auto-generated method stub.
+		return null;
+	}
+
+}

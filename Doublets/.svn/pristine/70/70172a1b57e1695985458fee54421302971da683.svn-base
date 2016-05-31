@@ -1,0 +1,75 @@
+import java.util.Iterator;
+import java.util.LinkedList;
+
+public class Chain implements Iterable<String>{
+	public LinkedList<String> chain; 
+	
+	/**
+	 * creates a linked List chain for words [initializes it]
+	 *
+	 */
+	public Chain() {
+		this.chain = new LinkedList<String>();
+		
+	}
+	
+	
+	/**
+	 * creates a new chain that has the added words
+	 */
+	public Chain(LinkedList<String> s){
+		this.chain = s;
+		
+	}
+	
+	/**
+	 * returns the last word of the chain
+	 *
+	 * @return
+	 */
+	public String getLast() {
+		return this.chain.getLast();
+	}
+	
+	/**
+	 * returns the length of the chain
+	 *
+	 * @return
+	 */
+	public int length() {
+		return this.chain.size();
+	}
+	
+	
+	
+	/**
+	 * adds an element to the end of this chain, then returns the new chain
+	 *
+	 */
+	public Chain addLast(String s) {
+		this.chain.add(s);
+		return new Chain(this.chain);
+		
+	}
+	
+	/**
+	 * returns true if this chain contains the word, else returns
+	 * false
+	 *
+	 * @param word
+	 * @return
+	 */
+	public boolean contains(String word) {
+		return this.chain.contains(word);
+	}
+	
+	/**
+	 * returns an iterator for the chain
+	 * 
+	 * @return
+	 */
+	public Iterator<String> iterator() {
+		return this.chain.iterator();
+	}
+	
+}

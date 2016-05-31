@@ -1,0 +1,324 @@
+package editortrees;
+
+// A node in a height-balanced binary tree with rank.
+// Except for the NULL_NODE (if you choose to use one), one node cannot
+// belong to two different trees.
+
+public class Node {
+
+	public class RotationData {
+		public int numOfRotations;
+		public Node latestNode;
+
+		public RotationData(int rotations, Node node) {
+			numOfRotations = rotations;
+			latestNode = node;
+		}
+	}
+
+	enum Code {
+		SAME, LEFT, RIGHT;
+		// Used in the displayer and debug string
+		public String toString() {
+			switch (this) {
+			case LEFT:
+				return "/";
+			case SAME:
+				return "=";
+			case RIGHT:
+				return "\\";
+			default:
+				throw new IllegalStateException();
+			}
+		}
+	}
+
+	// The fields would normally be private, but for the purposes of this class,
+	// we want to be able to test the results of the algorithms in addition to
+	// the
+	// "publicly visible" effects
+
+	char element;
+	Node left, right, parent; // subtrees
+	int rank = 0; // inorder position of this node within its own subtree.
+	Code balance = Code.SAME;
+	int size = 0;
+
+	/**
+	 * NULL_NODE constructor
+	 *
+	 */
+	public Node() {
+		this.left = null;
+		this.right = null;
+	}
+
+	/**
+	 * Node with left, right, and parent references
+	 *
+	 * @param element
+	 * @param parent
+	 */
+	public Node(char element, Node parent) {
+		this.left = EditTree.NULL_NODE;
+		this.right = EditTree.NULL_NODE;
+		this.element = element;
+		this.parent = parent;
+	}
+
+	/**
+	 * returns the height of the current node
+	 *
+	 * @return
+	 */
+	public int height() {
+		if (this.equals(EditTree.NULL_NODE)) {
+			return -1;
+		}
+		return 1 + Math.max(this.right.height(), this.left.height());
+	}
+
+	/**
+	 * returns the number of elements in the tree
+	 *
+	 * @return
+	 */
+	public int size() {
+		if (this.equals(EditTree.NULL_NODE)) {
+			return 0;
+		}
+		return 1 + this.left.size() + this.right.size();
+	}
+
+	/**
+	 * adds element at the rightmost position of the tree
+	 *
+	 * @param element
+	 * @return
+	 */
+	public int add(char element) {
+		// change to correctly return rotations
+		int rotations = 0;
+		if (this.right.equals(EditTree.NULL_NODE)) {
+			this.right = new Node(element, this);
+			this.changeBalance(true);
+		} else {
+			Code oldBalance = this.right.balance;
+			rotations = this.right.add(element);
+			if (rotations == 0) {
+				if ((!this.right.balance.equals(Code.SAME)) && (!this.right.balance.equals(oldBalance))) {
+					rotations = this.changeBalance(true);
+				}
+			}
+		}
+		return rotations;
+	}
+
+	/**
+	 * 
+	 * insterst the element at the given position
+	 *
+	 * @param c
+	 * @param pos
+	 * @return
+	 */
+	public int insert(char c, int pos) {
+		int rotations = 0;
+		if (this.rank >= pos) {
+			this.rank++;
+			if (this.left.equals(EditTree.NULL_NODE)) {
+				this.left = new Node(c, this);
+				rotations = this.changeBalance(false);
+			} else {
+				Code oldBalance = this.left.balance;
+				rotations = this.left.insert(c, pos);
+				if (rotations == 0) {
+					if ((!this.left.balance.equals(Code.SAME)) && (!this.left.balance.equals(oldBalance))) {
+						rotations = this.changeBalance(false);
+					}
+				}
+			}
+		} else {
+			if (this.right.equals(EditTree.NULL_NODE)) {
+				this.right = new Node(c, this);
+				rotations = this.changeBalance(true);
+			} else {
+				Code oldBalance = this.right.balance;
+				rotations = this.right.insert(c, pos - (this.rank + 1));
+				// check balance
+				if (rotations == 0) {
+					if ((!this.right.balance.equals(Code.SAME)) && (!this.right.balance.equals(oldBalance))) {
+						rotations = this.changeBalance(true);
+					}
+				}
+			}
+		}
+
+		return rotations;
+	}
+
+	/**
+	 * 
+	 * Checks the balance of the node by using what side the node was added on
+	 * 
+	 * @param addedRight
+	 * 
+	 */
+	private int changeBalance(boolean addedRight) {
+		int numOfRotations = 0;
+		if (addedRight) {
+			switch (this.balance) {
+			case RIGHT:
+				// need to rotate
+				numOfRotations = rotate(this.balance, this.right.balance);
+				break;
+			case LEFT:
+				this.balance = Code.SAME;
+				break;
+			case SAME:
+				this.balance = Code.RIGHT;
+				break;
+			}
+		} else {
+			switch (this.balance) {
+			case RIGHT:
+				this.balance = Code.SAME;
+				break;
+			case LEFT:
+				// rotate
+				numOfRotations = rotate(this.balance, this.left.balance);
+				break;
+			case SAME:
+				this.balance = Code.LEFT;
+				break;
+			}
+		}
+		return numOfRotations;
+
+	}
+
+	private int rotate(Code parentBalance, Code childBalance) {
+		if (parentBalance == Code.RIGHT) {
+			if (childBalance == Code.RIGHT) {
+				this.singleLeft();
+				return 1;
+			}
+			this.right.singleRight();
+			this.singleLeft();
+			return 2;
+		}
+
+		if (childBalance == Code.LEFT) {
+			this.singleRight();
+			return 1;
+		}
+		this.left.singleLeft();
+		this.singleRight();
+		return 2;
+
+	}
+
+	private void singleLeft() {
+		// changing orientation of nodes
+		if (this.parent.right == this) {
+			this.parent.right = this.right;
+		} else {
+			this.parent.left = this.right;
+		}
+
+		this.right.parent = this.parent;
+		this.parent = this.right;
+		this.right = this.right.left;
+		this.parent.left = this;
+
+		// changing balances of nodes
+		this.parent.balance = Code.SAME;
+		this.rank = this.left.size();
+		int rightHeight =-1;
+		int leftHeight = -1;
+		if(!this.right.equals(EditTree.NULL_NODE)){
+			rightHeight = this.right.height();
+		}
+		if(!this.left.equals(EditTree.NULL_NODE)){
+			leftHeight = this.left.height();
+		}
+		if (rightHeight > leftHeight) {
+			this.balance = Code.RIGHT;
+		} else if (leftHeight > rightHeight) {
+			this.balance = Code.LEFT;
+		} else {
+			this.balance = Code.SAME;
+		}
+	}
+
+	/**
+	 * Does a single left rotation at this node
+	 *
+	 */
+	private void singleRight() {
+
+		// changing orentation of nodes
+		if (this.parent.right == this) {
+			this.parent.right = this.left;
+		} else {
+			this.parent.left = this.left;
+		}
+
+		this.left.parent = this.parent;
+		this.parent = this.left;
+		this.left = this.left.right;
+		this.parent.right = this;
+
+		// changing balances of nodes
+		this.parent.balance = Code.SAME;
+		this.rank = this.left.size();
+
+		int rightHeight = this.right.height();
+		int leftHeight = this.left.height();
+		if (rightHeight > leftHeight) {
+			this.balance = Code.RIGHT;
+		} else if (leftHeight > rightHeight) {
+			this.balance = Code.LEFT;
+		} else {
+			this.balance = Code.SAME;
+		}
+
+		System.out.println("Single Left @ " + this.element + "" + this.rank + "" + this.balance);
+	}
+
+	public String toDebugString() {
+		if (this.equals(EditTree.NULL_NODE)) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.element + "" + this.rank + "" + this.balance.toString() + ", ");
+		sb.append(this.left.toDebugString());
+		sb.append(this.right.toDebugString());
+		return sb.toString();
+	}
+
+	public String toString() {
+		if (this.equals(EditTree.NULL_NODE)) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.left.toString());
+		sb.append(this.element + "");
+		sb.append(this.right.toString());
+		return sb.toString();
+	}
+
+	public char get(int pos) {
+		// if equal
+		if (this.rank == pos) {
+			return this.element;
+		}
+		// go right, and update position
+		if (this.rank < pos) {
+			return this.right.get(pos - (this.rank + 1));
+		}
+		// go left
+		return this.left.get(pos);
+	}
+
+}

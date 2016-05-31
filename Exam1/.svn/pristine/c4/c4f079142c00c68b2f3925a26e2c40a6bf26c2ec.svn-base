@@ -1,0 +1,45 @@
+package stacks;
+
+import java.lang.reflect.Array;
+
+/**
+ * An implementation of a PurgeableStack.
+ * 
+ * @author TODO: you.
+ * @param <T> Any type you want this stack to store.
+ */
+public class MyPurgeableStack<T> {
+	// TODO: Declare this class to implement PurgeableStack<T>, then add the
+	// missing methods (Eclipse will help with all EXCEPT toString, 
+	// which you must add that manually).
+	
+	// TODO: The javadoc for overridden methods is in the PurgeableStack
+	// interface. Read it!
+	
+	// If you use a growable array implementation, you'll probably want these 
+	// and the code in the constructor, so I include them for your convenience.
+	// If you don't, feel free to delete them.
+	private static final int INITIAL_CAPACITY = 5;
+	private T[] array;
+	private Class<T> type;
+	
+	// You may add any other fields you like.
+
+	/**
+	 * Creates an empty stack
+	 * 
+	 * @param type
+	 *            So that an array of this type can be constructed.
+	 */
+	@SuppressWarnings("unchecked")
+	public MyPurgeableStack(Class<T> type) {
+		// Please keep the type parameter so the tests will run (it's needed for 
+		// a growable array implementation), but you may ignore it if you choose
+		// a different implementation. 
+		// Otherwise, you may modify this method however you see fit.
+		this.type = type;
+		this.array = (T[]) Array.newInstance(this.type, INITIAL_CAPACITY);
+
+	}
+
+}

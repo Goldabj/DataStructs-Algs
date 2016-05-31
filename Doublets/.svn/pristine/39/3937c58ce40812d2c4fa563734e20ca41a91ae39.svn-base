@@ -1,0 +1,11 @@
+import java.util.TreeSet;
+
+/**
+ * Our implementation of Priority Queue
+ *
+ * @author goldacbj.
+ *         Created Nov 1, 2015.
+ */
+public class PriorityQueue<Chain> {
+	private TreeSet<String> priorityQueue;
+}

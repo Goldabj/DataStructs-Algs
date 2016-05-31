@@ -1,0 +1,158 @@
+/**
+ * Exam 2a. Tree methods.
+ * 
+ * @author Matt Boutell and TODO: You!
+ * @param <T>
+ */
+
+/*
+ * TODO: Directions: Implement the methods below. See the paper for details.
+ */
+public class BinarySearchTree {
+
+	BinaryNode root;
+
+	private final BinaryNode NULL_NODE = new BinaryNode('\0');
+
+	public BinarySearchTree() {
+		root = NULL_NODE;
+	}
+
+	public boolean isLinkedList() {
+		// TODO: write me. See the paper for details
+		return false;
+	}
+
+	public String pathString(char item) {
+		// TODO: write me. See the paper for details
+		return "Replace me";
+	}
+
+	public int evaluate() {
+		// TODO: write me. See the paper for details
+		return -17;
+	}
+
+	// Other methods used by the unit tests are below BinaryNode.
+	
+	public class BinaryNode {
+		public char data;
+		public BinaryNode left;
+		public BinaryNode right;
+
+		// Helpers here:
+		
+		
+		
+		
+		
+		
+		
+		
+		// The rest of the methods are used by the unit tests and for debugging
+		public BinaryNode(char element) {
+			this.data = element;
+			this.left = NULL_NODE;
+			this.right = NULL_NODE;
+		}
+
+		public BinaryNode(char element, BinaryNode left, BinaryNode right) {
+			this(element);
+			this.left = left;
+			this.right = right;
+		}
+
+		public BinaryNode insert(char e) {
+			if (this == NULL_NODE) {
+				return new BinaryNode(e);
+			} else if (e < data) {
+				left = left.insert(e);
+			} else if (e > data) {
+				right = right.insert(e);
+			} else {
+				// do nothing
+			}
+			return this;
+		}
+
+		@Override
+		public String toString() {
+			if (this == NULL_NODE) {
+				return "";
+			}
+			return left.toString() + this.data + right.toString();
+		}
+
+		public String toIndentString(String indent) {
+			if (this == NULL_NODE) {
+				return indent + "NULL\n";
+			}
+
+			String myInfo = indent + String.format("%c\n", this.data);
+
+			return myInfo + this.left.toIndentString(indent + "  ") + this.right.toIndentString(indent + "  ");
+		}
+	}
+
+	// The next methods are used by the unit tests
+	public void insert(char e) {
+		root = root.insert(e);
+	}
+
+	/**
+	 * Constructs a binary tree using the given in-order and pre-order
+	 * traversals.
+	 * 
+	 * @param preOrder
+	 * @param inOrder
+	 */
+	public BinarySearchTree(String preOrder, String inOrder) {
+		root = buildTree(preOrder, inOrder);
+	}
+
+	/**
+	 * Feel free to call from tests to use to verify the shapes of your trees
+	 * while debugging. Just remove the calls you are done so the output isn't
+	 * cluttered.
+	 * 
+	 * @return A string showing a traversal of the nodes where children are
+	 *         indented so that the structure of the tree can be determined.
+	 * 
+	 */
+	public String toIndentString() {
+		return root.toIndentString("");
+	}
+
+	@Override
+	public String toString() {
+		return root.toString();
+	}
+	
+	/**
+	 * Builds a binary tree with the given in-order and pre-order traversals.
+	 * This is a nice algorithm. :)
+	 * 
+	 * @param preOrder
+	 * @param inOrder
+	 * 
+	 * @return the root of the generated binary tree, or null for an empty tree
+	 */
+	BinaryNode buildTree(String preOrder, String inOrder) {
+		if (inOrder.length() == 0) {
+			return NULL_NODE;
+		}
+		char elem = preOrder.charAt(0);
+		int elemsInOrderIndex = inOrder.indexOf(elem);
+		if (elemsInOrderIndex < 0) {
+			throw new IllegalArgumentException("no valid tree for given arguments");
+		}
+
+		String leftPreOrder = preOrder.substring(1, elemsInOrderIndex + 1);
+		String rightPreOrder = preOrder.substring(elemsInOrderIndex + 1);
+		String leftInOrder = inOrder.substring(0, elemsInOrderIndex);
+		String rightInOrder = inOrder.substring(elemsInOrderIndex + 1);
+		BinaryNode left = buildTree(leftPreOrder, leftInOrder);
+		BinaryNode right = buildTree(rightPreOrder, rightInOrder);
+		return new BinaryNode(elem, left, right);
+	}
+}

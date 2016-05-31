@@ -1,0 +1,58 @@
+package evaluator;
+
+import java.util.Stack;
+
+public class InfixEvaluator extends Evaluator {
+
+	@Override
+	public int evaluate(String expression) throws ArithmeticException {
+		// TODO Auto-generated method stub.
+
+		String postFix = convertToPostfix(expression);
+		PostfixEvaluator pfe = new PostfixEvaluator();
+		return pfe.evaluate(postFix);
+	}
+
+	public String convertToPostfix(String exp) { 
+		
+		Stack <String> ops = new Stack<String>();
+		String[] operations = exp.split(" ");
+		StringBuilder s = new StringBuilder();
+		
+		for(int i = 0; i < operations.length; i++){
+			if (isLegal(operations[i]))
+				s.append(operations[i] + " ");
+			else if (operations[i].contains(")")){
+				while (!ops.peek().contains("(")){
+					s.append(ops.pop() + " ");
+				} ops.pop();
+			}
+			else if (ops.size() == 0 || rank(ops.peek()) < rank(operations[i])) 
+				ops.push(operations[i]);
+			else { 
+				s.append(ops.pop() + " ");
+				ops.push(operations[i]);
+				}
+		}
+		while(ops.size() != 0){
+			if (ops.peek().contains("(") || s.length() == 0)
+				throw new ArithmeticException();
+			s.append(ops.pop() + " ");	
+		}
+		System.out.println(s.toString());
+		return s.toString();
+	}
+	private int rank(String s){
+		if (s.contains(")")) return 5; 
+		if (s.contains("^")) return 4; 
+		if (s.contains("*") || s.contains("/")) return 3; 
+		if (s.contains("+") || s.contains("-")) return 2; 
+		if (s.contains("(")) return 1;  
+		return 0;
+	}		
+}	
+	
+	
+	
+
+

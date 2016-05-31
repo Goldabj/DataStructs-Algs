@@ -1,0 +1,17 @@
+/**
+ * class used with the Priority Queue, therefore it must implement Comapraable
+ * and have a prioiryt
+ *
+ * @author goldacbj.
+ *         Created Nov 1, 2015.
+ */
+public class PriorityChainElement<T> implements Comparable<PriorityChainElement<T>>{
+
+
+	@Override
+	public int compareTo(PriorityChainElement<T> o) {
+		// TODO Auto-generated method stub.
+		return 0;
+	}
+
+}
